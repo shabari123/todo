@@ -1,4 +1,4 @@
-name: Django CI (Local Test + Lint + Coverage)
+name: Django CI with Docker
 
 on:
   push:
@@ -9,44 +9,23 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Step 1: Checkout code
+      # Checkout code
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # Step 2: Set up Python
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: "3.11"
+      # Set up Docker Buildx
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
-      # Step 3: Install dependencies + tools
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-          pip install flake8 black coverage
+      # Build Docker image
+      - name: Build Docker image
+        run: docker build -t my-django-app .
 
-      # Step 4: Run flake8 lint check
-      - name: Lint with flake8
-        run: |
-          echo "Running flake8..."
-          flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-          flake8 . --count --exit-zero --max-complexity=10 --max-line-length=88 --statistics
-
-      # Step 5: Check code formatting with black
-      - name: Check code formatting
-        run: |
-          echo "Checking code formatting with black..."
-          black --check .
-
-      # Step 6: Run migrations
+      # Run Django tests inside container
       - name: Run migrations
-        run: python manage.py migrate
+        run: docker run --rm my-django-app python manage.py migrate
 
-      # Step 7: Run tests with coverage
-      - name: Run tests with coverage
-        run: |
-          coverage run manage.py test
-          coverage report
+      - name: Run tests
+        run: docker run --rm my-django-app python manage.py test
 
 
