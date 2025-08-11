@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>TODO List</title>
+</head>
+<body>
+    <h1>TODO List</h1>
+    <form method="post">
+        {% csrf_token %}
+        <input type="text" name="title" placeholder="New task">
+        <button type="submit">Add</button>
+    </form>
+    <ul>
+        {% for todo in todos %}
+            <li>
+                <a href="{% url 'toggle_todo' todo.id %}">
+                    {% if todo.completed %}
+                        <s>{{ todo.title }}</s>
+                    {% else %}
+                        {{ todo.title }}
+                    {% endif %}
+                </a>
+            </li>
+        {% endfor %}
+    </ul>
+</body>
+</html>
